@@ -11,25 +11,21 @@ const (
 	UpdateName = "set-number-update"
 )
 
-type SetFlagInput struct {
-	Number int
-}
-
 func SimpleWorkflow(ctx workflow.Context) (int, error) {
 	logger := workflow.GetLogger(ctx)
 
-	var input SetFlagInput
+	var input int
 
 	// Register update handler - only sets flag if number > 50
 	err := workflow.SetUpdateHandlerWithOptions(ctx, UpdateName,
-		func(ctx workflow.Context, newInput SetFlagInput) (int, error) {
+		func(ctx workflow.Context, newInput int) (int, error) {
 			input = newInput
-			return input.Number, nil
+			return input, nil
 		},
 		workflow.UpdateHandlerOptions{
-			Validator: func(ctx workflow.Context, input SetFlagInput) error {
-				if input.Number < 50 {
-					return fmt.Errorf("Number must be >= 50, got %d", input.Number)
+			Validator: func(ctx workflow.Context, input int) error {
+				if input < 50 {
+					return fmt.Errorf("Number must be >= 50, got %d", input)
 				}
 				return nil
 			},
@@ -48,8 +44,8 @@ func SimpleWorkflow(ctx workflow.Context) (int, error) {
 	})
 
 	// Wait for flag to be set (either via signal or update)
-	workflow.Await(ctx, func() bool { return input.Number >= 50 })
+	workflow.Await(ctx, func() bool { return input >= 50 })
 
 	logger.Info("Flag was set, workflow completing")
-	return input.Number, nil
+	return input, nil
 }
