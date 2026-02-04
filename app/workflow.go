@@ -18,11 +18,12 @@ type SetFlagInput struct {
 func SimpleWorkflow(ctx workflow.Context) (int, error) {
 	logger := workflow.GetLogger(ctx)
 
-  var input SetFlagInput
+	var input SetFlagInput
 
 	// Register update handler - only sets flag if number > 50
 	err := workflow.SetUpdateHandlerWithOptions(ctx, UpdateName,
-		func(ctx workflow.Context, input SetFlagInput) (int, error) {
+		func(ctx workflow.Context, newInput SetFlagInput) (int, error) {
+			input = newInput
 			return input.Number, nil
 		},
 		workflow.UpdateHandlerOptions{
